@@ -1,12 +1,26 @@
 .register-box {
-    width: 400px;
-    height: 500px;
-    margin: 0 auto;
+    width: 1300px;
+    height: 520px;
     position: absolute;
     top: 53%;
     left: 50%;
     transform: translate(-50%, -50%);
     background-color: white;
     box-shadow: 0px 0px 15px 0px rgba(0, 0, 0, 0.4);
-    border-radius: 10px;
+    border-radius: 10px; 
+     
 }
+
+.register-h1 {
+    font-weight: 300;
+    text-align: center;
+    margin-top: 0px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    margin-bottom: 10px;
+    background: #02b6ad;
+    font: bold 40px Arial, sans-serif;
+    color:#fff;
+}
+
+

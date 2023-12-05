@@ -1,12 +1,13 @@
 import React from 'react';
 import './styles.css';
-import { Button, Checkbox, Form, Input } from 'antd';
+import { Button, Checkbox, Form, Input, message } from 'antd';
 
 const onFinish = (values) => {
-  console.log('Success:', values);
+  message.success('Login realizado com sucesso!');
+  window.location.href = "/principal";
 };
 const onFinishFailed = (errorInfo) => {
-  console.log('Failed:', errorInfo);
+  message.error('Erro ao fazer login!');
 };
 
 function login() {
