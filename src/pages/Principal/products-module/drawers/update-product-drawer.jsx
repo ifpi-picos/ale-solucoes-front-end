@@ -23,19 +23,30 @@ form,
       value: parseFloat(values.value),
       unit_of_measurement: values.unit_of_measurement,
       category: values.category,
-    });
-
-    form.resetFields();
-    onClose();
-
-    if(result.status === 200) {
-      message.success('Produto atualizado com sucesso!');
-
-      return true;
-    }
-    else {
+    },
+    {
+      headers: {
+        Authorization: `${localStorage.getItem('token')}`
+      }
+    }).then((response) => {
+        form.resetFields();
+        onClose();
+    
+        if(response.status === 200) {
+          message.success('Produto atualizado com sucesso!');
+    
+          return true;
+        }
+        else {
+          message.error('Erro ao atualizar produto!');
+        }
+      }
+    ).catch((error) => {
       message.error('Erro ao atualizar produto!');
     }
+    );
+        
+
   }
 
   return (

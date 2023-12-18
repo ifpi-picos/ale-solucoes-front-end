@@ -24,24 +24,45 @@ const MyBudgetsModules = () => {
     }
     
     const onClickDownloadPdf = async (record) => {
-        console.log(record)
     
-        const result = await axios.get(`http://localhost:3010/api/budgets/list-one/${record.key}`)
+        const result = await axios.get(`http://localhost:3010/api/budgets/list-one/${record.key}`,
+        {
+          headers: {
+            Authorization: `${localStorage.getItem('token')}`,
+            }
+        }
+        ).then((response) => { 
+          const resultPdfBase64 = response.data.data.budget_pdf;
+          downloadPDF(resultPdfBase64);
         
-        
-        const resultPdfBase64 = result.data.data.budget_pdf;
-        downloadPDF(resultPdfBase64);
+        }).catch((error) => {
+          message.error('Erro ao baixar orçamento!');
+        }
+        );
+
+        return result;
+          
     }
     
     const onClickDeleteBudget = async (record) => {
-        const result = await axios.delete(`http://localhost:3010/api/budgets/delete/${record.key}`);
-        
-        if(result.status === 200) {
-            message.success('Orçamento apagado com sucesso!');                    
+        const result = await axios.delete(`http://localhost:3010/api/budgets/delete/${record.key}`,
+        {
+          headers: {
+            Authorization: `${localStorage.getItem('token')}`,
+            }
+        }).then((response) => {
+          if(response.status === 200) {
+              message.success('Orçamento apagado com sucesso!');                    
+          }
+          else {
+            message.error('Erro ao apagar orçamento!');
+          }
         }
-        else {
+        ).catch((error) => {
           message.error('Erro ao apagar orçamento!');
         }
+        );
+        return result;
       };
     
     
@@ -110,7 +131,12 @@ const MyBudgetsModules = () => {
 
     
     const getAllBudgets = async () => {
-        const result = await axios.get('http://localhost:3010/api/budgets/list-all')
+        const result = await axios.get('http://localhost:3010/api/budgets/list-all',
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            }
+        })
     
         
         const data = result.data.data.map((budget) => ({  

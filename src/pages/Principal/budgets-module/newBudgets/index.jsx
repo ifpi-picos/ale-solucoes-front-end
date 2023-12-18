@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import { Form, Input, Button, Select} from 'antd';
+import { Form, Input, Button, Select, message} from 'antd';
 import { validateCPF } from '../../../../utils/validateCpf';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -9,6 +9,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import axios from 'axios';
+import { set } from 'date-fns';
 const { Option } = Select
 
 const NewBudgetsModule = () => {
@@ -51,9 +52,11 @@ const NewBudgetsModule = () => {
           products[i].quantity = 1;
         }
       }
-    
-      const companyInfo = await axios.get('http://localhost:3010/api/users/list-one/5');
+      const id = localStorage.getItem('user');
+
+      const companyInfo = await axios.get("http://localhost:3010/api/users/list-one/5");
       const company = companyInfo.data.data;
+      console.log(company,' companyyyyyyyyyy')
       const data = {
         budget_name: `${values.client_name} - ${new Date().toLocaleDateString()}`,
         created_by: 5,
@@ -64,30 +67,54 @@ const NewBudgetsModule = () => {
         value_discount: discount,
         value_total: invoiceSubtotal,
         value_with_discount: invoiceTotal,
-        company_name: company.company_name,
-        company_document: company.company_document,
-        company_street: company.street_name,
-        company_number: company.street_number,
-        company_city: company.city,
-        company_neiborhood: company.neighborhood,
-        company_state: company.state,
-        company_postal_code: company.postal_code,
+        company_name: company[0].company_name,
+        company_document: company[0].company_document,
+        company_street: company[0].street_name,
+        company_number: company[0].street_number,
+        company_city: company[0].city,
+        company_neiborhood: company[0].neighborhood,
+        company_state: company[0].state,
+        company_postal_code: company[0].postal_code,
       };
     
-      const result = await axios.post('http://localhost:3010/api/budgets/create', data);
-      const resultPdfBase64 = result.data.data;
+      const result = await axios.post('http://localhost:3010/api/budgets/create', data,
+      {
+        headers: {
+          Authorization: `${localStorage.getItem('token')}`,
+          "Content-Type": "application/json",
+        }
+      }).then((result) => {
+        if(result.status !== 200) {
+          message.error('Erro ao gerar orçamento!');
+          return;
+        }
+        message.success('Orçamento gerado com sucesso!');
+        const resultPdfBase64 = result.data.data;
+        setPdfBase64(resultPdfBase64);
+  
+        downloadPDF(resultPdfBase64);
+        
+        // Reset form and state variables
+        form.resetFields();
+        setRows([]);
+        setSelectedProducts([]);
+        setSelectedProductsArray([]);
+        setDiscount(0);
+        setValidadeStatusCpf('primary');
+        return result;
+      }
+      ).catch((error) => {
+        setTimeout(() => {
+          message.error('Token de acesso expirado!');
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+        }, 1000);
+        return error;
+      });
 
-      setPdfBase64(resultPdfBase64);
+      return result;
 
-      downloadPDF(resultPdfBase64);
-      
-      // Reset form and state variables
-      form.resetFields();
-      setRows([]);
-      setSelectedProducts([]);
-      setSelectedProductsArray([]);
-      setDiscount(0);
-      setValidadeStatusCpf('primary');
+
     };
     
       async function onChangeFormatCpf(cpf) {
@@ -110,12 +137,31 @@ const NewBudgetsModule = () => {
       }
       
     const getAllProducts = async () => {
-        const response = await fetch('http://localhost:3010/api/products/list-all');
-        const data = await response.json();
+      const result = await axios.get('http://localhost:3010/api/products/list-all', {
+        headers: {
+          Authorization: `${localStorage.getItem('token')}`,
+          "Content-Type": "application/json",
+        }
+      }).then((result) => {   
+        if(result.status !== 200) {
+          message.error('Erro ao carregar produtos!');
+          return;
+        }
 
-        setProducts(data.data)
+        setProducts(result.data.data);
+        return result;
+      }).catch((error) => {
+        setTimeout(() => {
+          message.error('Token de acesso expirado!');
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+        }, 1000);
 
-        return data;
+       
+        return error;
+      })
+
+      return result;
     }
 
     const renderProducts = () => {

@@ -1,10 +1,27 @@
 import React from 'react';
 import './styles.css';
 import { Button, Checkbox, Form, Input, message } from 'antd';
+import axios from 'axios';
 
-const onFinish = (values) => {
-  message.success('Login realizado com sucesso!');
-  window.location.href = "/principal";
+const onFinish = async (values) => {
+  const result = await axios.post('http://localhost:3010/api/users/login', {
+    company_document: values.company_document,
+    password: values.password,
+  }).then((response) => {
+    localStorage.setItem('user', response.data.data.id);
+    localStorage.setItem('token', response.data.data.token);
+    if(response.status === 200) {
+      message.success('Login realizado com sucesso!');
+      window.location.href = "/principal";
+    } else {
+      message.error('Erro ao fazer login!');
+    }
+  }
+  ).catch((error) => {
+    message.error('Erro ao fazer login!');
+  });
+
+  return result;
 };
 const onFinishFailed = (errorInfo) => {
   message.error('Erro ao fazer login!');
@@ -51,12 +68,12 @@ function login() {
             autoComplete="off"
             >
             <Form.Item
-              label="CPF ou CNPJ"
-              name="CPF ou CNPJ"
+              label="CNPJ"
+              name="company_document"
               rules={[
                 {
                   required: true,
-                  message: 'Por favor, insira seu CPF ou CNPJ!',
+                  message: 'Por favor, insira seu CNPJ!',
                 },
               ]}
             >

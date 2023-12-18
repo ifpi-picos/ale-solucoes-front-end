@@ -15,26 +15,33 @@ const ProductsModule = () => {
 
   async function onClickDeleteProduct(record) {
     const result = await axios.delete(`http://localhost:3010/api/products/delete/${record.code}`, {
-      headers: {
-        'Content-Type': 'application/json',
+        headers: {
+        Authorization: `${localStorage.getItem('token')}`,
         }
-        });
+        }).then((response) => {
+          if(response.status === 200) {
+            message.success('Produto apagado com sucesso!');
+            const result = axios.get('http://localhost:3010/api/products/list-all',
+            {
+              headers: {
+              Authorization: `${localStorage.getItem('token')}`,
+              }
+            })
+      
+            setData(response.data.data);
+          }
+          else {
+            message.error('Erro ao apagar produto!');
+          }
 
-    if(result.status === 200) {
-      message.success('Produto apagado com sucesso!');
-      axios.get('http://localhost:3010/api/products/list-all')
-      .then((response) => {
-        const responseData = response.data;
-        console.log(responseData)
-        setData(responseData.data); 
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-    }
-    else {
-      message.error('Erro ao apagar produto!');
-    }
+        }).catch((error) => {
+          message.error('Erro ao apagar produto!');
+        }
+        );
+
+        return result;
+
+
   };
 
   async function onClickUpdateProduct(record) {
@@ -126,10 +133,13 @@ const ProductsModule = () => {
   const handleCloseDrawerAddProduct = () => {
     form.resetFields();
     setOpenDrawerAddProduct(false); 
-    axios.get('http://localhost:3010/api/products/list-all')
+    axios.get('http://localhost:3010/api/products/list-all', {
+      headers: {
+      Authorization: `${localStorage.getItem('token')}`,
+      }
+    })
     .then((response) => {
       const responseData = response.data;
-      console.log(responseData)
       setData(responseData.data); 
     })
     .catch((error) => {
@@ -141,26 +151,34 @@ const ProductsModule = () => {
   const handleCloseDrawerUpdateProduct = () => {
     form.resetFields();
     setOpenDrawerUpdateProduct(false); 
-    axios.get('http://localhost:3010/api/products/list-all')
+    axios.get('http://localhost:3010/api/products/list-all', {
+      headers: {
+      Authorization: `${localStorage.getItem('token')}`,
+      }
+    })
     .then((response) => {
       const responseData = response.data;
       console.log(responseData)
       setData(responseData.data); 
     })
     .catch((error) => {
-      console.error(error);
+     message.error('Erro ao listar produto!');
     });
   };
 
   useEffect(() => {
-    axios.get('http://localhost:3010/api/products/list-all') 
+    axios.get('http://localhost:3010/api/products/list-all', {
+      headers: {
+        Authorization: `${localStorage.getItem('token')}`,
+        }
+        }) 
       .then((response) => {
         const responseData = response.data;
         console.log(responseData)
         setData(responseData.data); 
       })
       .catch((error) => {
-        console.error(error);
+        message.error('Erro ao listar produto!');
       });
   }, []);
 

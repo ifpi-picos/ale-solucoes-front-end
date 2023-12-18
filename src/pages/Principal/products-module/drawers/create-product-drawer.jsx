@@ -26,19 +26,29 @@ form,
       unit_of_measurement: values.unit_of_measurement,
       category: values.category,
       created_by: 1,
-    });
+    },
+    {
+      headers: {
+        Authorization: `${localStorage.getItem('token')}`
+      }
+    }).then((response) => {
+        setLoading(false);
+        form.resetFields();
+        onClose();
     
-    setLoading(false);
-    form.resetFields();
-    onClose();
-
-    if(result.status === 200) {
-      message.success('Produto criado com sucesso!');
-
-      return true;
-    } else {
+        if(response.status === 200) {
+          message.success('Produto criado com sucesso!');
+    
+          return true;
+        } else {
+          message.error('Erro ao criar produto!');
+        } 
+    }).catch((error) => {
+      setLoading(false);
       message.error('Erro ao criar produto!');
-    } 
+    });
+
+    
   }
 
   return (
